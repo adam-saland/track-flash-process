@@ -1,35 +1,49 @@
 //event listeners.
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
     const ofVersion = document.querySelector("#of-version")
     ofVersion.innerHTML = fin.desktop.getVersion();
-    async function downloadAsset() {
-        const appAsset = {
-            src: "http://localhost:5555/find-offenders.zip",
-            version: "0.0.1",
-            alias: "find-offenders",
-            target: "find-offenders/FindOffenders.exe",
-            mandatory: true
-        }
+    const appAsset = {
+        src: "http://localhost:5555/find-offenders.zip",
+        version: "0.0.1",
+        alias: "find-offenders",
+        target: "find-offenders/FindOffenders.exe",
+        mandatory: true
+    }
+    function launchAsset(appAssetInfo) {
+        fin.desktop.System.launchExternalProcess({
+            alias: appAssetInfo.alias,
+            arguments: '800',
+            listener: function (e) {
+                console.log(`the exit code ${e.exitCode}`);
+            }
+        }, () => {
+            console.log('asset launched');
+        }, (reason, err) => {
+            console.log(reason, err);
+        });
+    }
 
-        return (await fin.System.downloadAsset(appAsset, (progress => {
+    fin.desktop.System.getAppAssetInfo({alias: appAsset.alias}, appAssetInfo => {
+        console.log(`we already have the asset installed, let's just launch it.`);
+        launchAsset(appAssetInfo);
+    }, (r, err) => {
+
+        //Let's assume the asset is not available
+        console.log(`asset not found, let's download.`);
+        fin.desktop.System.downloadAsset(appAsset, progress => {
+
             //Print progress as we download the asset.
             const downloadedPercent = Math.floor((progress.downloadedBytes / progress.totalBytes) * 100);
             console.log(`Downloaded ${downloadedPercent}%`);
-        })));
-    }
-    await downloadAsset();
+        }, () => {
 
-    const appAssetInfo = await fin.System.getAppAssetInfo({ alias: 'find-offenders' }).then(assetInfo => console.log(assetInfo)).catch(err => console.log(err));
-    
-    // src url opens in a browser with launch External Process if it has http://
-    console.log(appAssetInfo)
+            //asset download complete, launch
+            launchAsset(appAsset);
+        }, (reason, error) => {
 
-    //This fails
-    fin.System.launchExternalProcess({
-        path: 'file:///localhost:5555/find-offenders/FindOffenders.exe',
-        arguments: '8',
-        listener: (result) => {
-            console.log("Exit Code", result.exitCode)
-        }
-    }).then(payload => console.log("Success: ", payload.uuid)).catch(err => console.log("Error: ", err))
+            //Failed the download.
+            console.log(reason, error);
+        });
+
+    });
 });

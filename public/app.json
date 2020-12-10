@@ -14,9 +14,16 @@
             }
         }
     },
+    "appAssets": [{
+        "src": "http://localhost:5555/find-offenders.zip",
+        "version": "0.0.1",
+        "alias": "find-offenders",
+        "target": "find-offenders/FindOffenders.exe",
+        "mandatory": true
+    }],
     "runtime": {
         "arguments": "--remote-debugging-port=9090",
-        "version": "stable"
+        "version": "16.83.53.27"
     },
     "shortcut": {
         "company": "OpenFin",
