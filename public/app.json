@@ -1,20 +1,27 @@
 {
     "startup_app": {
-        "name": "OpenfinPOC",
+        "name": "Track-Flash-Process",
         "url": "http://localhost:5555/index.html",
-        "uuid": "OpenfinPOC",
+        "uuid": "Track-Flash-Process",
         "applicationIcon": "http://localhost:5555/favicon.ico",
         "autoShow": true,
-        "saveWindowState": true
+        "saveWindowState": true,
+        "permissions": {
+            "System": {
+                "launchExternalProcess": true,
+                "terminateExternalProcess": true,
+                "downloadAsset": true
+            }
+        }
     },
     "runtime": {
         "arguments": "--remote-debugging-port=9090",
-        "version": "community"
+        "version": "stable"
     },
     "shortcut": {
         "company": "OpenFin",
-        "description": "Openfin POC",
+        "description": "Track Flash Example",
         "icon": "http://localhost:5555/favicon.ico",
-        "name": "Openfin POC"
+        "name": "Track Flash Example"
     }
 }

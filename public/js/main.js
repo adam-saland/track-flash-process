@@ -1,19 +1,35 @@
 //event listeners.
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    const ofVersion = document.querySelector("#of-version")
+    ofVersion.innerHTML = fin.desktop.getVersion();
+    async function downloadAsset() {
+        const appAsset = {
+            src: "http://localhost:5555/find-offenders.zip",
+            version: "0.0.1",
+            alias: "find-offenders",
+            target: "find-offenders/FindOffenders.exe",
+            mandatory: true
+        }
 
-    if (typeof fin != 'undefined') {
-        fin.desktop.main(onMain);
-    } else {
-        ofVersion.innerText = 'OpenFin is not available - you are probably running in a browser.';
+        return (await fin.System.downloadAsset(appAsset, (progress => {
+            //Print progress as we download the asset.
+            const downloadedPercent = Math.floor((progress.downloadedBytes / progress.totalBytes) * 100);
+            console.log(`Downloaded ${downloadedPercent}%`);
+        })));
     }
-});
+    await downloadAsset();
 
-//Once the DOM has loaded and the OpenFin API is ready
-function onMain() {
-    const app = fin.desktop.Application.getCurrent();
-    fin.desktop.System.showDeveloperTools(app.uuid, app.uuid);
-    fin.desktop.System.getVersion(version => {
-        const ofVersion = document.querySelector('#of-version');
-        ofVersion.innerText = version;
-    });
-}
+    const appAssetInfo = await fin.System.getAppAssetInfo({ alias: 'find-offenders' }).then(assetInfo => console.log(assetInfo)).catch(err => console.log(err));
+    
+    // src url opens in a browser with launch External Process if it has http://
+    console.log(appAssetInfo)
+
+    //This fails
+    fin.System.launchExternalProcess({
+        path: 'file:///localhost:5555/find-offenders/FindOffenders.exe',
+        arguments: '8',
+        listener: (result) => {
+            console.log("Exit Code", result.exitCode)
+        }
+    }).then(payload => console.log("Success: ", payload.uuid)).catch(err => console.log("Error: ", err))
+});
